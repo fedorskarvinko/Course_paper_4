@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Сообщение: {{ message.subject }}</title>
+    <style>
+        body { font-family: Arial; max-width: 700px; margin: 40px auto; padding: 20px; }
+        .message-info { background: #f9f9f9; padding: 25px; border-radius: 5px; border-left: 4px solid #2196F3; }
+        .field { margin-bottom: 20px; }
+        .label { font-weight: bold; color: #555; font-size: 0.9em; margin-bottom: 5px; }
+        .value { font-size: 1.1em; }
+        .body-content { white-space: pre-wrap; line-height: 1.6; background: white; padding: 15px; border-radius: 3px; }
+        .actions { margin-top: 25px; }
+        .btn { padding: 10px 15px; margin-right: 10px; text-decoration: none; border-radius: 4px; display: inline-block; }
+        .btn-edit { background: #2196F3; color: white; }
+        .btn-delete { background: #f44336; color: white; }
+        .btn-back { background: #757575; color: white; }
+    </style>
+</head>
+<body>
+<h1>📨 Сообщение: {{ message.subject }}</h1>
+
+<div class="message-info">
+    <div class="field">
+        <div class="label">ТЕМА ПИСЬМА:</div>
+        <div class="value"><strong>{{ message.subject }}</strong></div>
+    </div>
+
+    <div class="field">
+        <div class="label">ТЕКСТ ПИСЬМА:</div>
+        <div class="body-content">{{ message.body }}</div>
+    </div>
+
+    <div class="field">
+        <div class="label">ИДЕНТИФИКАТОР:</div>
+        <div class="value">ID: {{ message.pk }}</div>
+    </div>
+</div>
+
+<div class="actions">
+    <a href="{% url 'mailing:message_update' message.pk %}" class="btn btn-edit">✏️ Редактировать</a>
+    <a href="{% url 'mailing:message_delete' message.pk %}" class="btn btn-delete">🗑️ Удалить</a>
+    <a href="{% url 'mailing:message_list' %}" class="btn btn-back">← Назад к списку</a>
+</div>
+
+<div style="margin-top: 20px;">
+    <a href="{% url 'mailing:home' %}">← На главную</a> |
+    <a href="{% url 'mailing:client_list' %}">📋 К списку клиентов</a>
+</div>
+</body>
+</html>

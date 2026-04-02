@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Система управления рассылками</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+        }
+        .stat-card {
+            flex: 1;
+            padding: 20px;
+            margin: 0 10px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            text-align: center;
+            border-left: 4px solid #4CAF50;
+        }
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+        .stat-label {
+            color: #666;
+            margin-top: 10px;
+        }
+        .nav-links {
+            margin-top: 30px;
+            text-align: center;
+        }
+        .nav-links a {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 20px;
+            background: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        .nav-links a:hover {
+            background: #45a049;
+        }
+        .auth-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: center;
+        }
+        .logout-form {
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .logout-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .login-btn {
+            background: #2196F3;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+        }
+        .restricted-message {
+            color: #666;
+            padding: 10px 20px;
+            background: #fff3e0;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .cache-info {
+            margin-top: 20px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #666;
+            text-align: center;
+        }
+        .profile-btn {
+            background: #9C27B0;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-block;
+            margin-left: 10px;
+        }
+        .user-groups {
+            background: #e3f2fd;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+        .manager-badge {
+            background: #ff9800;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📊 Статистика системы рассылок</h1>
+
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-number">{{ total_mailings }}</div>
+            <div class="stat-label">Всего рассылок</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-number">{{ active_mailings }}</div>
+            <div class="stat-label">Активных рассылок</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-number">{{ unique_clients }}</div>
+            <div class="stat-label">Уникальных клиентов</div>
+        </div>
+    </div>
+
+    <!-- ИНФОРМАЦИЯ О КЕШИРОВАНИИ -->
+    <div class="cache-info">
+        <small>
+            ⚡ Статистика кешируется и обновляется каждые 5 минут.
+            {% if user.is_authenticated and user.is_superuser %}
+            <br>👑 <strong>Администратор:</strong> кеш автоматически очищается при изменении данных.
+            {% endif %}
+        </small>
+    </div>
+
+    <div class="nav-links">
+        <a href="/admin/">⚙️ Админ-панель</a>
+
+        {% if user.is_authenticated %}
+        <!-- Эти ссылки видны только авторизованным -->
+        <a href="{% url 'mailing:client_list' %}">👤 Клиенты</a>
+        <a href="{% url 'mailing:message_list' %}">📨 Сообщения</a>
+        <a href="{% url 'mailing:mailing_list' %}">📧 Рассылки</a>
+        <a href="{% url 'mailing:mailing_create' %}">➕ Создать рассылку</a>
+        {% else %}
+        <!-- Для неавторизованных показываем пояснение -->
+        <span class="restricted-message">
+                    🔒 Для доступа к клиентам и сообщениям нужно войти
+                </span>
+        {% endif %}
+    </div>
+
+    <div class="auth-section">
+        {% if user.is_authenticated %}
+        <span>Вы вошли как: <strong>{{ user.username }}</strong></span>
+
+        {% if user.groups.all %}
+        <span class="user-groups">
+                        Группы:
+                        {% for group in user.groups.all %}
+                            {{ group.name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </span>
+        {% endif %}
+
+        {% if user.is_superuser %}
+        <span class="manager-badge">👑 Админ</span>
+        {% elif user.groups.all.0.name == 'Менеджеры' %}
+        <span class="manager-badge">⚡ Менеджер</span>
+        {% endif %}
+
+        <!-- Ссылка на профиль -->
+        <a href="{% url 'profile' %}" class="profile-btn">👤 Профиль</a>
+
+        <!-- ФОРМА ДЛЯ ВЫХОДА -->
+        <form method="post" action="{% url 'logout' %}" class="logout-form">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn">🚪 Выйти</button>
+        </form>
+        {% else %}
+        <a href="{% url 'login' %}" class="login-btn">🔐 Войти</a>
+        <a href="{% url 'profile' %}" class="profile-btn">👤 Регистрация</a>
+        {% endif %}
+    </div>
+</div>
+</body>
+</html>
